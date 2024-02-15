@@ -1,37 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-function App() {
-  const [value, setValue] = useState("")
-  const [reverseValue, setReverseValue] = useState("")
-  const [storedValue, setStoredValue] = useState("")
-  const [message, setMessage] = useState("")
 
-  function showValue (e){
-    const inputValue = e.target.value
-    setValue(inputValue)
-    const reversedInput = inputValue.split('').reverse().join('')
-    setReverseValue(reversedInput)
+function App() {
+  const [value, setValue] = useState("");
+  const [reverseValue, setReverseValue] = useState("");
+  const [storedValue, setStoredValue] = useState([]);
+  const [message, setMessage] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(null);
+
+  function showValue(e) {
+    const inputValue = e.target.value;
+    setValue(inputValue);
+    const reversedInput = inputValue.split('').reverse().join('');
+    setReverseValue(reversedInput);
   }
 
   const saveToLocalStorage = (input) => {
-    localStorage.setItem("inputValue", input);
+    setStoredValue([...storedValue, input]);
   };
 
   const getFromLocalStorage = () => {
-    return localStorage.getItem("inputValue");
+    const lastStoredValue = storedValue.pop();
+    setStoredValue([...storedValue]); 
+    if(!lastStoredValue){
+      setValue("");
+      setReverseValue("");
+    }
+    return lastStoredValue || "";
   };
 
-  // Update storedValue state on component mount to show the last stored value
   useEffect(() => {
     const lastStoredValue = getFromLocalStorage();
     if (lastStoredValue) {
-      setStoredValue(lastStoredValue);
+      setValue(lastStoredValue);
+      const reversedInput = lastStoredValue.split('').reverse().join('');
+      setReverseValue(reversedInput);
     }
   }, []);
 
   function handleStoreValue() {
     saveToLocalStorage(value);
-    setStoredValue(value);
     setMessage("Input stored in local storage!");
     setValue("");
     setReverseValue("");
@@ -44,15 +52,17 @@ function App() {
       const reversedInput = lastStoredValue.split('').reverse().join('');
       setReverseValue(reversedInput);
       setMessage("Input restored from local storage!");
+      console.log("Current Index:", storedValue.length);
+      setCurrentIndex(storedValue.length);
     } else {
-      alert("No stored input found in local storage.");
+      setMessage("No stored input found in local storage.");
     }
   }
 
   return (
     <div className="App">
       <input placeholder="Enter an input" type="text" onChange={showValue}></input>
-      <p>Oringal Input: {value}</p>
+      <p>Original Input: {value}</p>
       <p>Reversed Input: {reverseValue}</p>
       <button onClick={handleStoreValue}>Store</button>
       <button onClick={handleRestoreValue}>Restore</button>
@@ -62,3 +72,4 @@ function App() {
 }
 
 export default App;
+
